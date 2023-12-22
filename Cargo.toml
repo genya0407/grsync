@@ -6,3 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+argopt = "0.*"
+log = "0.*"
+reqwest = { version = "0.*", features = ["blocking", "json"] }
+serde = { version = "1.*", features = ["derive"] }
+serde_json = "1.*"
+simple_logger = "4.*"
+tempfile = "3.*"
+tokio = "1.*"
