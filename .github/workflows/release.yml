@@ -19,37 +19,37 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout
 
       # https://github.com/actions/cache/blob/master/examples.md#rust---cargo
       - name: Cache cargo registry
-        uses: actions/cache@v1
+        uses: actions/cache
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
       - name: Cache cargo index
-        uses: actions/cache@v1
+        uses: actions/cache
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
       - name: Cache cargo build
-        uses: actions/cache@v1
+        uses: actions/cache
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-      - uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain
         with:
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
+      - uses: actions-rs/cargo
         with:
           command: build
           args: --release
 
       - run: |
           zip --junk-paths grsync-${{ matrix.target }} target/release/grsync
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact
         with:
           name: build-${{ matrix.target }}
           path: grsync-${{ matrix.target }}.zip
@@ -57,9 +57,11 @@ jobs:
   create-release:
     needs: [build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - id: create-release
-        uses: actions/create-release@v1
+        uses: actions/create-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -69,7 +71,7 @@ jobs:
           prerelease: false
       - run: |
           echo '${{ steps.create-release.outputs.upload_url }}' > release_upload_url.txt
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact
         with:
           name: create-release
           path: release_upload_url.txt
@@ -82,16 +84,16 @@ jobs:
     needs: [create-release]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact
         with:
           name: create-release
       - id: upload-url
         run: |
           echo "::set-output name=url::$(cat create-release/release_upload_url.txt)"
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact
         with:
           name: build-${{ matrix.target }}
-      - uses: actions/upload-release-asset@v1
+      - uses: actions/upload-release-asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
