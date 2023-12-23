@@ -22,3 +22,7 @@ $ grsync -o hoge
 # Downloads all images, including already downloaded ones.
 $ grsync --force
 ```
+
+## Installation
+
+see: https://github.com/genya0407/grsync/releases
