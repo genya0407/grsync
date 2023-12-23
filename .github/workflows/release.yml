@@ -48,7 +48,7 @@ jobs:
           args: --release
 
       - run: |
-          zip --junk-paths grsync target/release/grsync
+          zip --junk-paths grsync-${{ matrix.target }} target/release/grsync
       - uses: actions/upload-artifact@v1
         with:
           name: build-${{ matrix.target }}
