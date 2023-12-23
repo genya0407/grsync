@@ -105,7 +105,7 @@ fn main(
     #[opt(long = "host", default_value = "192.168.0.1")] host: String,
     #[opt(short = 'o', long = "output-dir", default_value = "downloaded_photos")]
     output_dir: String,
-    /// Download all images including already downloaded ones
+    /// Download all images, including already downloaded ones
     #[opt(long)]
     force: bool,
 ) {
