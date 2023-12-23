@@ -57,6 +57,8 @@ jobs:
   create-release:
     needs: [build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - id: create-release
         uses: actions/create-release@v1
