@@ -50,33 +50,44 @@ impl Grsync {
             )
         }
 
-        for dir in photos.dirs {
+        let mut photos_to_be_downloaded = vec![];
+        for dir in &photos.dirs {
             let dir_path = std::path::Path::new(&self.output_dir).join(&dir.name);
             std::fs::create_dir_all(&dir_path).unwrap();
-            for file_name in dir.files {
+            for file_name in &dir.files {
                 let target_file_path = dir_path.join(&file_name);
-                if !self.force && target_file_path.try_exists().unwrap() {
-                    log::info!("Skipping {}", file_name);
-                } else {
-                    log::info!("Downloading {} ...", file_name);
-
-                    let photo_url =
-                        format!("http://{}/v1/photos/{}/{}", self.host, &dir.name, file_name);
-                    let resp = client.get(&photo_url).send().unwrap();
-                    if resp.status() != 200 {
-                        panic!(
-                            "Failed to GET {}, message: {}",
-                            photo_url,
-                            resp.text().unwrap()
-                        );
-                    }
-
-                    let mut file = std::fs::File::create(target_file_path).unwrap();
-                    let mut content = std::io::Cursor::new(resp.bytes().unwrap());
-                    std::io::copy(&mut content, &mut file).unwrap();
+                if self.force || !target_file_path.try_exists().unwrap() {
+                    photos_to_be_downloaded.push((&dir.name, file_name));
                 }
             }
         }
+
+        for (i, photo) in photos_to_be_downloaded.iter().enumerate() {
+            log::info!(
+                "{}/{}, Downloading {} ...",
+                i,
+                photos_to_be_downloaded.len(),
+                photo.1
+            );
+
+            let photo_url = format!("http://{}/v1/photos/{}/{}", self.host, photo.0, photo.1);
+            let resp = client.get(&photo_url).send().unwrap();
+            if resp.status() != 200 {
+                panic!(
+                    "Failed to GET {}, message: {}",
+                    photo_url,
+                    resp.text().unwrap()
+                );
+            }
+
+            let target_file_path = std::path::Path::new(&self.output_dir)
+                .join(photo.0)
+                .join(photo.1);
+            let mut file = std::fs::File::create(target_file_path).unwrap();
+            let mut content = std::io::Cursor::new(resp.bytes().unwrap());
+            std::io::copy(&mut content, &mut file).unwrap();
+        }
+        log::info!("Download complete",);
     }
 
     fn wait_for_server(&self) {
