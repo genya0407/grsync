@@ -64,9 +64,10 @@ impl Grsync {
 
         for (i, photo) in photos_to_be_downloaded.iter().enumerate() {
             log::info!(
-                "{}/{}, Downloading {} ...",
+                "{}/{}, Downloading {}/{} ...",
                 i,
                 photos_to_be_downloaded.len(),
+                photo.0,
                 photo.1
             );
 
